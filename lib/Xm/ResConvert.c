@@ -2646,8 +2646,10 @@ static Boolean cvtStringToXmRenderTable(Display *dpy, Widget widget,
 	}
 
 	/* Create renditions for each tag */
+	/* Not b ? NULL : s: BSD strtok_r sets b to NULL after the last token. */
 	s = XtNewString((String)from->addr);
-	while ((tag = _Xmstrtok(b ? NULL : s, "\t\r\n\v\f, ", &b))) {
+	for (tag = _Xmstrtok(s, "\t\r\n\v\f, ", &b); tag;
+	     tag = _Xmstrtok(NULL, "\t\r\n\v\f, ", &b)) {
 		/* Prevent XLFD pattern strings from polluting the tag cache */
 		if (strchr(tag, '*'))
 			goto fallback;

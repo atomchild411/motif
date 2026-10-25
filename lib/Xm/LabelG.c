@@ -1220,6 +1220,19 @@ SetNormalGC(XmLabelGadget lw)
     LabG_NormalGC(lw) = XtAllocateGC((Widget) mw, 0, valueMask, &values,
         dynamicMask, 0);
 
+    if (_XmIsIrixStyle(XtDisplay(lw))) {
+        /* IRIX: insensitive text is the foreground through a 50% stipple,
+         * and the etch shadow is drawn in the background colour. */
+        values.fill_style = FillStippled;
+        values.stipple = _XmGetInsensitiveStippleBitmap((Widget) lw);
+        LabG_InsensitiveGC(lw) = XtAllocateGC((Widget) mw, 0,
+            valueMask | GCFillStyle | GCStipple, &values, dynamicMask, 0);
+        values.foreground = LabG_Background(lw);
+        LabG_ShadowGC(lw) = XtAllocateGC((Widget) mw, 0, valueMask, &values,
+            dynamicMask, 0);
+        return;
+    }
+
     /*generally gray insensitive foreground (instead stipple)*/
     values.foreground = _XmAssignInsensitiveColor((Widget)lw);
     values.background = LabG_Background(lw);
@@ -2364,7 +2377,8 @@ LRectangle *background_box)
                        LabG_PixmapRect(lw).y,
                        LabG_PixmapRect(lw).width,
                        LabG_PixmapRect(lw).height);
-                    XSetFillStyle(XtDisplay(lw), gc, FillSolid);
+                    XSetFillStyle(XtDisplay(lw), gc, _XmIsIrixStyle(XtDisplay(lw)) ?
+                        FillStippled : FillSolid);
                 }
             }
         }

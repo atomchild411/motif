@@ -251,6 +251,13 @@ static XtResource resources[] = {
     },
 
     {
+        "enableIrixStyle", "EnableIrixStyle",
+	XmRBoolean, sizeof(Boolean),
+	Offset(display.enable_irix_style),
+	XmRImmediate, (XtPointer) False
+    },
+
+    {
         XmNenableMultiKeyBindings, XmCEnableMultiKeyBindings,
 	XmRBoolean, sizeof(Boolean),
 	Offset(display.enable_multi_key_bindings),
@@ -1231,3 +1238,15 @@ _XmSetThicknessDefault0(
 	value->addr = (XPointer)&thickness;
 }
 
+
+/*
+ * Whether the enableIrixStyle resource is set for this display's XmDisplay
+ * (see DisplayP.h).
+ */
+Boolean
+_XmIsIrixStyle(Display *display)
+{
+	XmDisplay xmDisplay = (XmDisplay) XmGetXmDisplay(display);
+
+	return xmDisplay != NULL && xmDisplay->display.enable_irix_style;
+}

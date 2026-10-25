@@ -3130,8 +3130,19 @@ static void _XmStringDrawSegment(Display *d, Drawable w, Position x,
 		if (get_substring_pos(seg, *underline, rendertable, rend, x,
 		                      &u_begin, &u_end)) {
 			*underline = NULL; /* only once */
-			XDrawLine(d, draw, gc, u_begin, y + descender + ulyoff,
-			          u_end, y + descender + ulyoff);
+			if (_XmIsIrixStyle(d)) {
+				/*
+				 * IRIX style: a stroke, not a rule; a thin
+				 * line with a two pixel head at its left end.
+				 */
+				int uy = y + descender + ulyoff;
+
+				XDrawLine(d, draw, gc, u_begin + 1, uy, u_end, uy);
+				XFillRectangle(d, draw, gc, u_begin, uy, 4, 2);
+			}
+			else
+				XDrawLine(d, draw, gc, u_begin, y + descender + ulyoff,
+				          u_end, y + descender + ulyoff);
 		}
 	}
 

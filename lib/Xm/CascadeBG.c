@@ -1042,6 +1042,8 @@ Redisplay(
 	    XmGetColors(XtScreen(mw), mw->core.colormap,
 		mw->core.background_pixel,
                 &junk, &junk, &junk, &select_pix);
+	    if (_XmIsIrixStyle(XtDisplay((Widget) mw)))
+		select_pix = LabG_BottomShadowColor(cb);
 
 	    if (select_pix == mw->manager.foreground) {
 		/* mw->core.background_pixel */
@@ -2699,6 +2701,9 @@ GetArmGC(
 
   XmGetColors(XtScreen(mw), mw->core.colormap, mw->core.background_pixel,
 	      &junk, &junk, &junk, &select_pixel);
+  /* IRIX style: armed buttons fill with their (light) bottom shadow */
+  if (_XmIsIrixStyle(XtDisplay((Widget) mw)))
+      select_pixel = LabG_BottomShadowColor(cb);
 
   valueMask = GCForeground | GCBackground | GCGraphicsExposures;
 

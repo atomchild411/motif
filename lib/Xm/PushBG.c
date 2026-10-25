@@ -62,6 +62,7 @@ static char rcsid[] = "$TOG: PushBG.c /main/29 1999/05/27 14:18:33 mgreess $"
 #include "TraversalI.h"
 #include "UniqueEvnI.h"
 #include "XmI.h"
+#include "IrixStyleI.h"
 
 #define DELAY_DEFAULT		100
 #define XmINVALID_MULTICLICK	255
@@ -213,6 +214,7 @@ static XmImportOperator ShowAsDef_ToHorizPix(
                         Widget widget,
                         int offset,
                         XtArgVal *value);
+static Boolean IrixButton(XmPushButtonGadget pb);
 static Boolean ComputePBLabelArea(
                         XmPushButtonGadget pb,
                         LRectangle *box);
@@ -1881,6 +1883,13 @@ Initialize(
   if (PBG_Compatible (new_w))
     PBG_DefaultButtonShadowThickness(new_w) = PBG_ShowAsDefault(new_w);
 
+  /* IRIX style marks the default button with a glyph, not a shadow. */
+  if (IrixButton(new_w))
+    {
+      PBG_Compatible (new_w) = False;
+      PBG_DefaultButtonShadowThickness(new_w) = 0;
+    }
+
   /* No unarm_pixmap but do have an arm_pixmap, use that. */
   if ((LabG_Pixmap(new_w) == XmUNSPECIFIED_PIXMAP) &&
       (PBG_ArmPixmap(new_w) != XmUNSPECIFIED_PIXMAP))
@@ -2313,6 +2322,15 @@ SetValues(
 
   if (PBG_Compatible (new_w))
     PBG_DefaultButtonShadowThickness(new_w) = PBG_ShowAsDefault(new_w);
+
+  if (IrixButton(new_w))
+    {
+      PBG_Compatible (new_w) = False;
+      PBG_DefaultButtonShadowThickness(new_w) = 0;
+      /* The default glyph moves the label: redraw it all. */
+      if (PBG_ShowAsDefault(new_w) != PBG_ShowAsDefault(current))
+	flag = True;
+    }
 
   adjustment = AdjustHighLightThickness (new_w, current);
 
@@ -2861,7 +2879,14 @@ DrawPushButtonLabelGadget(
       replace_for_fill_tmpGC = True;
     }
 
-  DrawLabelGadget(pb, event, region);
+  if (IrixButton(pb) && PBG_ShowAsDefault(pb))
+    {
+      LabG_TextRect(pb).x -= IRIX_GLYPH_SHIFT;
+      DrawLabelGadget(pb, event, region);
+      LabG_TextRect(pb).x += IRIX_GLYPH_SHIFT;
+    }
+  else
+    DrawLabelGadget(pb, event, region);
 
   if (replaceGC)
     LabG_NormalGC(pb) = tmp_gc;
@@ -2948,6 +2973,27 @@ static void
 DrawPushButtonGadgetShadows(
         XmPushButtonGadget pb )
 {
+  if (IrixButton(pb))
+    {
+      int dx = pb->gadget.highlight_thickness;
+      int st = pb->gadget.shadow_thickness;
+      int x = pb->rectangle.x + dx, y = pb->rectangle.y + dx;
+      int w = pb->rectangle.width - 2 * dx, h = pb->rectangle.height - 2 * dx;
+
+      if (w <= 2 * st || h <= 2 * st)
+	return;
+      _XmIrixDrawButtonShadows((Widget) pb, XtWindow(pb), LabG_Background(pb),
+			       x, y, w, h, st, PBG_Armed(pb));
+      if (PBG_ShowAsDefault(pb))
+	_XmIrixDrawDefaultGlyph((Widget) pb, XtWindow(pb),
+				PBG_Armed(pb) && PBG_FillOnArm(pb) ?
+				PBG_ArmColor(pb) : LabG_Background(pb),
+				LabG_Foreground(pb),
+				x + w - 1 - st - IRIX_GLYPH_INSET,
+				y + h / 2);
+      return;
+    }
+
   if (PBG_DefaultButtonShadowThickness(pb))
     {
       EraseDefaultButtonShadows (pb);
@@ -3137,6 +3183,18 @@ ShowAsDef_ToHorizPix(
     *value = (XtArgVal) 1;
 
   return(returnVal);
+}
+
+
+/*
+ * IrixButton()
+ *	True for a push button drawn the IRIX way: IRIX style, not in a menu.
+ */
+
+static Boolean
+IrixButton(XmPushButtonGadget pb)
+{
+  return !LabG_IsMenupane(pb) && _XmIsIrixStyle(XtDisplay(pb));
 }
 
 static Boolean

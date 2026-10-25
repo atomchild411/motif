@@ -1332,6 +1332,34 @@ DeleteChild(
 }
 
 
+
+/*
+ * The shadow round a row column; in IRIX style (enableIrixStyle), popup
+ * and pulldown menu panes also get a black outline over its outer pixel.
+ */
+static void
+DrawPaneShadow(XmRowColumnWidget m)
+{
+    XGCValues values;
+    GC gc;
+
+    XmeDrawShadows (XtDisplay (m), XtWindow (m),
+		    m->manager.top_shadow_GC,
+		    m->manager.bottom_shadow_GC,
+		    0, 0, m->core.width, m->core.height,
+		    m->manager.shadow_thickness,
+		    XmSHADOW_OUT);
+    if ((IsPopup (m) || IsPulldown (m)) && _XmIsIrixStyle (XtDisplay (m)) &&
+        m->core.width > 1 && m->core.height > 1)
+    {
+	values.foreground = BlackPixelOfScreen (XtScreen (m));
+	gc = XtGetGC ((Widget) m, GCForeground, &values);
+	XDrawRectangle (XtDisplay (m), XtWindow (m), gc, 0, 0,
+			m->core.width - 1, m->core.height - 1);
+	XtReleaseGC ((Widget) m, gc);
+    }
+}
+
 /*
  * The set of our managed children changed, so maybe change the size of the
  * row column widget to fit them; there is no instigator of this change, and
@@ -1443,12 +1471,7 @@ ChangeManaged(
 
   /* and redraw it for shrinking size */
   if (XtIsRealized ((Widget)m) && m->manager.shadow_thickness )
-    XmeDrawShadows (XtDisplay (m), XtWindow (m),
-		    m->manager.top_shadow_GC,
-		    m->manager.bottom_shadow_GC,
-		    0, 0, m->core.width, m->core.height,
-		    m->manager.shadow_thickness,
-		    XmSHADOW_OUT);
+    DrawPaneShadow (m);
 
   m->row_column.old_width = m->core.width;
   m->row_column.old_height = m->core.height;
@@ -3745,12 +3768,7 @@ Resize(
 
    if (draw_shadow && XtIsRealized ((Widget)m) && m->manager.shadow_thickness )
        /* pop-out not pop-in */
-     XmeDrawShadows (XtDisplay (m), XtWindow (m),
-		     m->manager.top_shadow_GC,
-		     m->manager.bottom_shadow_GC,
-		     0, 0, m->core.width, m->core.height,
-		     m->manager.shadow_thickness,
-		     XmSHADOW_OUT);
+     DrawPaneShadow (m);
 
    RC_SetFromResize(m, FALSE);
 }
@@ -3793,13 +3811,7 @@ Redisplay(
         if (IsPopup (m) || IsPulldown (m) || IsBar(m))
         {
             if (MGR_ShadowThickness(m))
-                XmeDrawShadows (XtDisplay (m), XtWindow (m),
-                    /* pop-out not pop-in */
-                    m->manager.top_shadow_GC,
-                    m->manager.bottom_shadow_GC,
-                    0, 0, m->core.width, m->core.height,
-                    m->manager.shadow_thickness,
-		    XmSHADOW_OUT);
+                DrawPaneShadow (m);
         }
     }
 

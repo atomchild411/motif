@@ -88,6 +88,7 @@ GeoUtilsI.h \
 HashI.h \
 IconGI.h \
 ImageCachI.h \
+IrixStyleI.h \
 LabelGI.h \
 LabelI.h \
 ManagerI.h \
@@ -242,7 +243,8 @@ SRCS2 = Desktop.c       Messages.c      Transltns.c     RepType.c \
         BBUtil.c        ChColor.c\
         DrTog.c         DrArrow.c       DrPoly.c        DrHiDash.c \
         ValTime.c       FocusAct.c      ScalTics.c \
-        ScroVis.c       WidGet.c        ToolTip.c       Cursor.c
+        ScroVis.c       WidGet.c        ToolTip.c       Cursor.c \
+        IrixStyle.c
 
 OBSO_SRCS = Obso1_2.c ObsoStr.c ObsoXme.c Obso2_0.c XmStringObso.c obsolete.c
 

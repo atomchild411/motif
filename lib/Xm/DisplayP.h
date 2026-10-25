@@ -115,6 +115,7 @@ typedef struct {
     Boolean			enable_unselectable_drag;
     Boolean                     enable_thin_thickness;
     Boolean			enable_multi_key_bindings;
+    Boolean			enable_irix_style;	/* IRIX look */
 } XmDisplayPart, *XmDisplayPartPtr;
 
 typedef struct _XmDisplayInfo {
@@ -141,6 +142,15 @@ typedef struct _XmDisplayRec{
 externalref XmDisplayClassRec 	xmDisplayClassRec;
 
 externalref String _Xm_MOTIF_DRAG_AND_DROP_MESSAGE ;
+
+/*
+ * enableIrixStyle: draw the way IRIX 6.5's IRIS IM does: a black outline
+ * round menu panes, a light fill for the armed cascade button, a stroked
+ * mnemonic underline, stippled insensitive labels, and push buttons outside
+ * menus with an outlined two-tone bevel and a return glyph on the default
+ * button (IrixStyle.c). False by default.
+ */
+extern Boolean _XmIsIrixStyle(Display *display);
 
 
 #ifdef __cplusplus

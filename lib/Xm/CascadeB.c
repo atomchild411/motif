@@ -605,6 +605,8 @@ Redisplay(
 	    XmGetColors(XtScreen(cb), cb->core.colormap,
 			cb->core.background_pixel,
 			&junk, &junk, &junk, &select_pix);
+	    if (_XmIsIrixStyle(XtDisplay((Widget) cb)))
+		select_pix = ((XmCascadeButtonWidget)cb)->primitive.bottom_shadow_color;
 
 	    if (select_pix ==
 		((XmCascadeButtonWidget)cb)->primitive.foreground) {
@@ -2241,6 +2243,9 @@ GetArmGC(
 
   XmGetColors(XtScreen(cb), cb->core.colormap, cb->core.background_pixel,
 	      &junk, &junk, &junk, &select_pixel);
+  /* IRIX style: armed buttons fill with their (light) bottom shadow */
+  if (_XmIsIrixStyle(XtDisplay((Widget) cb)))
+      select_pixel = cb->primitive.bottom_shadow_color;
 
   valueMask = GCForeground | GCBackground | GCGraphicsExposures;
 
